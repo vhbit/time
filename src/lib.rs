@@ -578,6 +578,13 @@ pub struct TmFmt<'a> {
     format: Fmt<'a>
 }
 
+#[cfg(tests)]
+impl<'a> TmFmt<'a> {
+    fn to_string(&self) -> String {
+        format!("{}", self)
+    }
+}
+
 enum Fmt<'a> {
     FmtStr(&'a str),
     FmtRfc3339,
@@ -657,6 +664,14 @@ fn validate_format<'a>(fmt: TmFmt<'a>) -> Result<TmFmt<'a>, ParseError> {
     }
     Ok(fmt)
 }
+
+impl<'a> fmt::String for TmFmt<'a> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
+        let t = self as &fmt::Show;
+        t.fmt(fmt)
+    }
+}
+
 
 impl<'a> fmt::Show for TmFmt<'a> {
     fn fmt(&self, fmt: &mut fmt::Formatter) -> fmt::Result {
@@ -1492,7 +1507,7 @@ mod tests {
         let time = Timespec::new(1234567890, 54321);
         let local = at(time);
 
-        debug!("time_at: {}", local);
+        debug!("time_at: {:?}", local);
 
         assert_eq!(local.tm_sec, 30_i32);
         assert_eq!(local.tm_min, 31_i32);
